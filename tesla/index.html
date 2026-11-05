@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Tesla koppelen</title>
+    <style>
+      :root {
+        color-scheme: dark light;
+        --achter: #081421;
+        --kaart: #10233a;
+        --tekst: #eef4fb;
+        --zacht: #9fb3c8;
+        --knop: #3fa7ff;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --achter: #f3f6fa;
+          --kaart: #ffffff;
+          --tekst: #0d1b2a;
+          --zacht: #4a5d72;
+          --knop: #0a66c2;
+        }
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        background: var(--achter);
+        color: var(--tekst);
+        font: 16px/1.5 system-ui, sans-serif;
+      }
+      main {
+        max-width: 560px;
+        margin: 0 auto;
+        background: var(--kaart);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 8px;
+      }
+      p {
+        color: var(--zacht);
+        margin: 0 0 12px;
+      }
+      #code {
+        display: block;
+        font: 600 18px/1.4 ui-monospace, monospace;
+        padding: 12px;
+        border-radius: 10px;
+        background: var(--achter);
+        overflow-wrap: anywhere;
+        margin: 0 0 12px;
+      }
+      button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--knop);
+        color: #fff;
+        font: 600 16px system-ui, sans-serif;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Tesla koppelen met Core</h1>
+      <p id="uitleg">Plak deze code in Core (het venster waar je <code>node brug.mjs tesla</code> startte).</p>
+      <code id="code">Geen code gevonden. Log opnieuw in via de link die Core liet zien.</code>
+      <button id="kopieer" type="button" hidden>Kopieer</button>
+      <p id="klaar" role="status"></p>
+      <p>Deze pagina bewaart niets en stuurt niets door; de code staat alleen in de adresbalk van deze browser.</p>
+    </main>
+    <script>
+      (function () {
+        var q = new URLSearchParams(location.search);
+        var code = q.get('code');
+        var fout = q.get('error_description') || q.get('error');
+        var vak = document.getElementById('code');
+        var knop = document.getElementById('kopieer');
+        var klaar = document.getElementById('klaar');
+        if (fout) {
+          vak.textContent = 'Tesla gaf geen toestemming: ' + fout;
+          return;
+        }
+        if (!code) return;
+        // Core controleert de state; daarom de hele code met state erachter, zoals Core hem verwacht.
+        var tekst = '?code=' + encodeURIComponent(code) + (q.get('state') ? '&state=' + encodeURIComponent(q.get('state')) : '');
+        vak.textContent = tekst;
+        knop.hidden = false;
+        knop.addEventListener('click', function () {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(tekst).then(
+              function () {
+                klaar.textContent = 'Gekopieerd. Plak hem in Core.';
+              },
+              function () {
+                klaar.textContent = 'Kopiëren lukte niet; selecteer de code en kopieer hem zelf.';
+              },
+            );
+          } else klaar.textContent = 'Selecteer de code en kopieer hem zelf.';
+        });
+      })();
+    </script>
+  </body>
+</html>
